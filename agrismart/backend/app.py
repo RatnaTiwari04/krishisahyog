@@ -13,7 +13,7 @@ CORS(app)
 
 # Configure Gemini AI
 genai.configure(api_key=Config.GEMINI_API_KEY)
-model = genai.GenerativeModel('gemini-1.5-flash')  # Changed from 'gemini-pro'
+model = genai.GenerativeModel('gemini-1.5-flash')  
 
 # Agricultural context for better AI responses
 AGRICULTURE_CONTEXT = """
