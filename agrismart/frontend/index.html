@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgriSmart - AI Agricultural Support</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+        }
+        
+        .language-selector {
+            margin: 10px 0;
+        }
+        
+        .language-selector select {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 25px;
+            background: #3498db;
+            color: white;
+            font-size: 14px;
+        }
+        
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #34495e;
+        }
+        
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ecf0f1;
+            border-radius: 10px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .chat-container {
+            height: 300px;
+            border: 2px solid #ecf0f1;
+            border-radius: 15px;
+            padding: 15px;
+            overflow-y: auto;
+            background: #f8f9fa;
+            margin-bottom: 15px;
+        }
+        
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 10px;
+        }
+        
+        .user-message {
+            background: #3498db;
+            color: white;
+            margin-left: 20%;
+        }
+        
+        .ai-message {
+            background: #ecf0f1;
+            color: #2c3e50;
+            margin-right: 20%;
+        }
+        
+        .image-upload {
+            border: 2px dashed #bdc3c7;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+        
+        .image-upload:hover {
+            border-color: #3498db;
+        }
+        
+        .recommendations {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-top: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .crop-recommendation {
+            background: linear-gradient(45deg, #e8f5e8, #d4edda);
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .metric-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+        }
+        
+        .metric-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .metric-label {
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .weather-widget {
+            background: linear-gradient(45deg, #74b9ff, #0984e3);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .header h1 {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🌾 AgriSmart - AI Agricultural Support</h1>
+            <p>Smart farming solutions powered by AI</p>
+            <div class="language-selector">
+                <select id="languageSelect" onchange="changeLanguage()">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="ta">தமிழ்</option>
+                    <option value="te">తెలుగు</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div class="card">
+                <h2>📍 Farm Information</h2>
+                <div class="form-group">
+                    <label for="location">Location</label>
+                    <input type="text" id="location" placeholder="Enter your location" value="Chengalpattu, Tamil Nadu">
+                </div>
+                
+                <div class="form-group">
+                    <label for="farmSize">Farm Size (acres)</label>
+                    <input type="number" id="farmSize" placeholder="Enter farm size" value="5">
+                </div>
+                
+                <div class="form-group">
+                    <label for="soilType">Soil Type</label>
+                    <select id="soilType">
+                        <option value="clay">Clay</option>
+                        <option value="loam">Loam</option>
+                        <option value="sandy">Sandy</option>
+                        <option value="silt">Silt</option>
+                    </select>
+                </div>
+                
+                <button class="btn" onclick="analyzeFarm()">Analyze Farm Conditions</button>
+            </div>
+
+            <div class="card">
+                <h2>🤖 AI Assistant</h2>
+                <div class="chat-container" id="chatContainer">
+                    <div class="message ai-message">
+                        Hello! I'm your AI agricultural assistant. How can I help you today?
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chatInput" placeholder="Ask about crops, diseases, weather..." style="flex: 1;">
+                    <button class="btn" onclick="sendMessage()">Send</button>
+                </div>
+                
+                <div style="margin-top: 15px;">
+                    <button class="btn" onclick="startVoiceInput()" style="background: linear-gradient(45deg, #e74c3c, #c0392b);">
+                        🎤 Voice Input
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>📸 Crop Disease Detection</h2>
+            <div class="image-upload" onclick="document.getElementById('imageInput').click()">
+                <p>📷 Click to upload crop image for disease detection</p>
+                <input type="file" id="imageInput" accept="image/*" style="display: none;" onchange="analyzeImage()">
+            </div>
+            <div id="imageResult" style="margin-top: 15px;"></div>
+        </div>
+
+        <div class="dashboard">
+            <div class="metric-card">
+                <div class="metric-value" id="soilpH">6.8</div>
+                <div class="metric-label">Soil pH</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value" id="moisture">45%</div>
+                <div class="metric-label">Soil Moisture</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value" id="temperature">28°C</div>
+                <div class="metric-label">Temperature</div>
+            </div>
+            
+            <div class="metric-card">
+                <div class="metric-value" id="humidity">65%</div>
+                <div class="metric-label">Humidity</div>
+            </div>
+        </div>
+
+        <div class="weather-widget">
+            <h3>🌤️ Weather Forecast</h3>
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-top: 15px;">
+                <div style="text-align: center;">
+                    <div>Today</div>
+                    <div style="font-size: 1.5rem;">☀️ 32°C</div>
+                    <div style="font-size: 0.9rem;">Sunny</div>
+                </div>
+                <div style="text-align: center;">
+                    <div>Tomorrow</div>
+                    <div style="font-size: 1.5rem;">🌦️ 29°C</div>
+                    <div style="font-size: 0.9rem;">Light Rain</div>
+                </div>
+                <div style="text-align: center;">
+                    <div>Day 3</div>
+                    <div style="font-size: 1.5rem;">⛅ 31°C</div>
+                    <div style="font-size: 0.9rem;">Partly Cloudy</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="recommendations" id="recommendations" style="display: none;">
+            <h2>🌱 Crop Recommendations</h2>
+            <div id="cropList"></div>
+        </div>
+
+        <div class="card" style="margin-top: 20px;">
+            <h2>📊 Yield & Profit Analysis</h2>
+            <canvas id="yieldChart" width="400" height="200"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let currentLanguage = 'en';
+        
+        const translations = {
+            en: {
+                title: "AgriSmart - AI Agricultural Support",
+                subtitle: "Smart farming solutions powered by AI",
+                farmInfo: "Farm Information",
+                location: "Location",
+                farmSize: "Farm Size (acres)",
+                soilType: "Soil Type",
+                analyze: "Analyze Farm Conditions",
+                assistant: "AI Assistant",
+                greeting: "Hello! I'm your AI agricultural assistant. How can I help you today?",
+                askPlaceholder: "Ask about crops, diseases, weather...",
+                send: "Send",
+                voice: "Voice Input",
+                diseaseDetection: "Crop Disease Detection",
+                uploadImage: "Click to upload crop image for disease detection",
+                recommendations: "Crop Recommendations",
+                weather: "Weather Forecast"
+            },
+            hi: {
+                title: "एग्रीस्मार्ट - AI कृषि सहायता",
+                subtitle: "AI द्वारा संचालित स्मार्ट खेती समाधान",
+                farmInfo: "खेत की जानकारी",
+                location: "स्थान",
+                farmSize: "खेत का आकार (एकड़)",
+                soilType: "मिट्टी का प्रकार",
+                analyze: "खेत की स्थिति का विश्लेषण करें",
+                assistant: "AI सहायक",
+                greeting: "नमस्ते! मैं आपका AI कृषि सहायक हूं। आज मैं आपकी कैसे मदद कर सकता हूं?",
+                askPlaceholder: "फसल, बीमारी, मौसम के बारे में पूछें...",
+                send: "भेजें",
+                voice: "आवाज इनपुट",
+                diseaseDetection: "फसल रोग पहचान",
+                uploadImage: "रोग पहचान के लिए फसल की तस्वीर अपलोड करने के लिए क्लिक करें",
+                recommendations: "फसल सिफारिशें",
+                weather: "मौसम पूर्वानुमान"
+            }
+        };
+
+        function changeLanguage() {
+            const select = document.getElementById('languageSelect');
+            currentLanguage = select.value;
+            updateUI();
+        }
+
+        function updateUI() {
+            const t = translations[currentLanguage] || translations.en;
+            document.querySelector('.header h1').textContent = `🌾 ${t.title}`;
+            document.querySelector('.header p').textContent = t.subtitle;
+        }
+
+        function analyzeFarm() {
+            const location = document.getElementById('location').value;
+            const farmSize = document.getElementById('farmSize').value;
+            const soilType = document.getElementById('soilType').value;
+            
+            // Simulate API call
+            setTimeout(() => {
+                updateMetrics();
+                showRecommendations();
+                addAIMessage(`Based on your ${farmSize} acre farm in ${location} with ${soilType} soil, I've analyzed the conditions. Check the recommendations below!`);
+            }, 1500);
+        }
+
+        function updateMetrics() {
+            // Simulate real-time data
+            document.getElementById('soilpH').textContent = (6.5 + Math.random() * 1).toFixed(1);
+            document.getElementById('moisture').textContent = Math.floor(40 + Math.random() * 20) + '%';
+            document.getElementById('temperature').textContent = Math.floor(25 + Math.random() * 10) + '°C';
+            document.getElementById('humidity').textContent = Math.floor(60 + Math.random() * 20) + '%';
+        }
+
+        function showRecommendations() {
+            const recommendationsDiv = document.getElementById('recommendations');
+            const cropList = document.getElementById('cropList');
+            
+            const crops = [
+                { name: 'Rice', yield: '4.5 tons/acre', profit: '₹85,000', sustainability: '85%' },
+                { name: 'Sugarcane', yield: '65 tons/acre', profit: '₹1,20,000', sustainability: '78%' },
+                { name: 'Cotton', yield: '15 quintals/acre', profit: '₹75,000', sustainability: '82%' }
+            ];
+            
+            cropList.innerHTML = crops.map(crop => `
+                <div class="crop-recommendation">
+                    <h4>🌾 ${crop.name}</h4>
+                    <p><strong>Expected Yield:</strong> ${crop.yield}</p>
+                    <p><strong>Estimated Profit:</strong> ${crop.profit}</p>
+                    <p><strong>Sustainability Score:</strong> ${crop.sustainability}</p>
+                </div>
+            `).join('');
+            
+            recommendationsDiv.style.display = 'block';
+            createYieldChart();
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (message) {
+                addUserMessage(message);
+                input.value = '';
+                
+                // Get current context for better AI responses
+                const context = {
+                    location: document.getElementById('location').value,
+                    farmSize: document.getElementById('farmSize').value,
+                    soilType: document.getElementById('soilType').value,
+                    language: currentLanguage
+                };
+                
+                // Show typing indicator
+                addAIMessage("Thinking...");
+                
+                // Send to Gemini AI backend
+                fetch('http://localhost:5000/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        message: message,
+                        language: currentLanguage,
+                        location: context.location,
+                        farmSize: context.farmSize,
+                        soilType: context.soilType
+                    })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Remove typing indicator
+                    const chatContainer = document.getElementById('chatContainer');
+                    const messages = chatContainer.querySelectorAll('.message');
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.textContent === "Thinking...") {
+                        lastMessage.remove();
+                    }
+                    
+                    // Add AI response
+                    addAIMessage(data.response);
+                })
+                .catch(error => {
+                    console.error('Chat error:', error);
+                    // Remove typing indicator and show fallback
+                    const chatContainer = document.getElementById('chatContainer');
+                    const messages = chatContainer.querySelectorAll('.message');
+                    const lastMessage = messages[messages.length - 1];
+                    if (lastMessage.textContent === "Thinking...") {
+                        lastMessage.remove();
+                    }
+                    
+                    const fallbackResponses = {
+                        'en': "I'm here to help with your agricultural needs. Please check your internet connection and try again.",
+                        'hi': "मैं आपकी कृषि संबंधी सहायता के लिए यहाँ हूँ। कृपया अपना इंटरनेट कनेक्शन जांचें और पुनः प्रयास करें।"
+                    };
+                    addAIMessage(fallbackResponses[currentLanguage] || fallbackResponses['en']);
+                });
+            }
+        }
+
+        function addUserMessage(message) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message user-message';
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function addAIMessage(message) {
+            const chatContainer = document.getElementById('chatContainer');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message ai-message';
+            messageDiv.textContent = message;
+            chatContainer.appendChild(messageDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        function startVoiceInput() {
+            if ('webkitSpeechRecognition' in window) {
+                const recognition = new webkitSpeechRecognition();
+                recognition.lang = currentLanguage === 'hi' ? 'hi-IN' : 'en-US';
+                recognition.onresult = function(event) {
+                    const transcript = event.results[0][0].transcript;
+                    document.getElementById('chatInput').value = transcript;
+                };
+                recognition.start();
+            } else {
+                alert('Voice input not supported in this browser');
+            }
+        }
+
+        function analyzeImage() {
+            const input = document.getElementById('imageInput');
+            const resultDiv = document.getElementById('imageResult');
+            
+            if (input.files[0]) {
+                resultDiv.innerHTML = `
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 10px; border-left: 4px solid #ffc107;">
+                        <h4>🔍 Analysis Result:</h4>
+                        <p><strong>Disease Detected:</strong> Early Blight</p>
+                        <p><strong>Confidence:</strong> 87%</p>
+                        <p><strong>Treatment:</strong> Apply copper-based fungicide, ensure proper ventilation</p>
+                        <p><strong>Prevention:</strong> Crop rotation, avoid overhead watering</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createYieldChart() {
+            const ctx = document.getElementById('yieldChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Rice', 'Sugarcane', 'Cotton'],
+                    datasets: [{
+                        label: 'Estimated Profit (₹ thousands)',
+                        data: [85, 120, 75],
+                        backgroundColor: ['#2ecc71', '#3498db', '#e74c3c'],
+                        borderRadius: 5
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top'
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Auto-update metrics every 30 seconds
+        setInterval(updateMetrics, 30000);
+
+        // Chat input event listener
+        document.getElementById('chatInput').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // Initialize
+        updateMetrics();
+    </script>
+</body>
+</html>
